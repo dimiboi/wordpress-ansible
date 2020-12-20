@@ -1,0 +1,28 @@
+#cloud-config
+
+system_info:
+  default_user:
+    name: dmitry
+    groups: sudo
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC7fU5SEyTRxMhf1pw1whnrQ4vxGNMGr+RCGnPSuR46gNW1yiD6i8UKrpPIjbUO8ltDdieAFXMnklSjaGuVmNLkXic1sptlO4B6I3Hr1eN/UlM/YzoY5aFJ1zl6c6qLE/ywr7DaOEI343T3sDwdWVH3f3wTN4gKQoinLlgkpFhTSsQ7ozPu/I+Ao4sDDRr+B3sKz1rt2ynGZcR010DJxlJlmkPXRRzapWrGFv5pHjwqOeALiY5hr/i48zYKU/3CgprVgNOyAnPe+yl/dBUG+TPbB+E7OeCBtxktrlQVfhyEJlIjhpfGhFC/LLTiOliAB8JJDAa2ISbfoBi5z74FJRQethCCDzTWR/58L71qoVB7ioVESwQle6sYAZVLeam4Ppo+J517yWpagjBNyOItlZbi8g/Ypr6oHlo5jEa5VXp4OBxDm1QpttncX4A7HKPP0iTg855Ot7W5ymTTHhtcAQcGS6P5Q6FLd6u0N48a1w8bQoJFKCzzZXHVnONd1j8CY70ozpMYxP7MiCrhRIwCLdHQlFVkT86xzE3GYDyIZossR+NHoeTCO2QNhZ4OX6KwdDvLoXvmuyG99xjpYx8i+E0RKPU4KASvHssSfF2XrwV9O7q8ZxQe+GIHjr7OPUL3nk+XuFcamA46RZWjbof9PTsJFs7WRdPWEYXiN4qDD+FK6w== cardno:000613653478
+disable_root: true
+random_seed:
+    file: /dev/urandom
+    command: ["pollinate", "--server", "https://entropy.ubuntu.com/"]
+    command_required: true
+runcmd:
+  - passwd -l root
+  - perl -i -pe 's/^\/\/(\h*\"\$\{distro_id\}:\$\{distro_codename\}-updates\";)\h*$/$1/' /etc/apt/apt.conf.d/50unattended-upgrades
+  - perl -i -pe 's/^\/\/\h*(Unattended-Upgrade::Remove-Unused-Kernel-Packages)\h+.*$/$1 "true";/' /etc/apt/apt.conf.d/50unattended-upgrades
+  - perl -i -pe 's/^\/\/\h*(Unattended-Upgrade::Remove-New-Unused-Dependencies)\h+.*$/$1 "true";/' /etc/apt/apt.conf.d/50unattended-upgrades
+  - perl -i -pe 's/^\/\/\h*(Unattended-Upgrade::Remove-Unused-Dependencies)\h+.*$/$1 "true";/' /etc/apt/apt.conf.d/50unattended-upgrades
+  - perl -i -pe 's/^\/\/\h*(Unattended-Upgrade::Automatic-Reboot)\h+.*$/$1 "true";/' /etc/apt/apt.conf.d/50unattended-upgrades
+  - perl -i -pe 's/^\/\/\h*(Unattended-Upgrade::Automatic-Reboot-WithUsers)\h+.*$/$1 "false";/' /etc/apt/apt.conf.d/50unattended-upgrades
+  - perl -i -pe 's/^\/\/\h*(Unattended-Upgrade::Automatic-Reboot-Time)\h+.*$/$1 "02:00";/' /etc/apt/apt.conf.d/50unattended-upgrades
+  - yes | dpkg-reconfigure --priority=low unattended-upgrades --frontend=teletype
+  - ufw default deny incoming
+  - ufw default allow outgoing
+  - ufw allow "OpenSSH"
+  - ufw enable

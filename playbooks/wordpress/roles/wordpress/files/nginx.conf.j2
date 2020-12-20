@@ -1,0 +1,36 @@
+server {
+    root {{ wordpress_path }};
+    index index.php;
+    server_name {{ wordpress_http_host }} www.{{ wordpress_http_host }};
+
+    location / {
+        try_files $uri $uri/ /index.php$is_args$args;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+
+    listen 443 ssl;
+    ssl_certificate /etc/letsencrypt/live/{{ wordpress_http_host }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ wordpress_http_host }}/privkey.pem;
+}
+
+server {
+    if ($host = {{ wordpress_http_host }}) {
+        return 301 https://$host$request_uri;
+    }
+
+    if ($host = www.{{ wordpress_http_host }}) {
+        return 301 https://$host$request_uri;
+    }
+
+    listen 80;
+    server_name {{ wordpress_http_host }} www.{{ wordpress_http_host }};
+    return 404;
+}

@@ -1,0 +1,15 @@
+- name: Install Nginx packages
+  apt:
+    name: "{{ item }}"
+    update_cache: yes
+    state: latest
+  loop:
+    - nginx
+- name: Ensure Nginx is running
+  service:
+    name: nginx
+    state: started
+- name: Allow Nginx Full through firewall
+  ufw:
+    rule: allow
+    name: Nginx Full

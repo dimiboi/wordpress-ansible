@@ -1,0 +1,28 @@
+---
+ssh_allow_users: dmitry
+
+php_modules:
+  - php-curl
+  - php-gd
+  - php-mbstring
+  - php-xml
+  - php-xmlrpc
+  - php-soap
+  - php-intl
+  - php-zip
+
+nginx_client_max_body_size: 100M
+php_upload_max_filesize: 100M
+php_post_max_size: 100M
+
+mysql_hardening_enabled: true
+mysql_hardening_user: mysql
+mysql_datadir: /var/lib/mysql
+mysql_hardening_mysql_hardening_conf_file: /etc/mysql/conf.d/hardening.cnf
+mysql_root_password: "{{ lookup('password', '.credentials/mysql/root length=32') }}"
+
+wordpress_mysql_password: "{{ lookup('password', '.credentials/mysql/wordpress length=32') }}"
+wordpress_http_host: example.com
+
+certbot_email: example@example.com
+certbot_dns_google_credentials_file: ~/certbot-service-account.json

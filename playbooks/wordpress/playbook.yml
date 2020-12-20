@@ -1,0 +1,17 @@
+---
+- hosts: all
+  become: true
+  vars_files:
+    - vars/default.yml
+  collections:
+    - devsec.hardening
+  roles:
+    - common
+    - devsec.hardening.ssh_hardening
+    - nginx
+    - devsec.hardening.nginx_hardening
+    - mariadb
+    - devsec.hardening.mysql_hardening
+    - php
+    - wordpress
+    - devsec.hardening.os_hardening

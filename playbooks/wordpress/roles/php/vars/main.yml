@@ -1,0 +1,6 @@
+php_version: 7.4
+php_ini_path: "/etc/php/{{ php_version }}/fpm/php.ini"
+php_service_name: "php{{ php_version }}-fpm"
+php_packages:
+  - "php{{ php_version }}-fpm"
+  - "php{{ php_version }}-mysql"

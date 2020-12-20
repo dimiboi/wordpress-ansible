@@ -1,0 +1,11 @@
+- name: Install MariaDB packages
+  apt:
+    name: "{{ item }}"
+    update_cache: yes
+    state: latest
+  loop:
+    - mariadb-server
+- name: Ensure MariaDB is running
+  service:
+    name: mariadb
+    state: started

@@ -1,0 +1,30 @@
+- name: Install PHP packages
+  apt:
+    name: "{{ item }}"
+    update_cache: yes
+    state: latest
+  loop: "{{ php_packages }}"
+- name: Install PHP modules
+  apt:
+    name: "{{ item }}"
+    update_cache: yes
+    state: latest
+  loop: "{{ php_modules }}"
+- name: Set PHP upload max filesize
+  ini_file:
+    path: "{{ php_ini_path }}"
+    section: PHP
+    option: upload_max_filesize
+    value: "{{ php_upload_max_filesize }}"
+  notify: reload php-fpm
+- name: Set PHP post max size
+  ini_file:
+    path: "{{ php_ini_path }}"
+    section: PHP
+    option: post_max_size
+    value: "{{ php_post_max_size }}"
+  notify: reload php-fpm
+- name: Ensure PHP is running
+  service:
+    name: "{{ php_service_name }}"
+    state: started

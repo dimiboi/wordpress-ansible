@@ -1,0 +1,109 @@
+# WordPress
+- name: Create database for WordPress
+  mysql_db:
+    name: "{{ wordpress_mysql_db }}"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+- name: Create MariaDB user for WordPress
+  mysql_user:
+    name: "{{ wordpress_mysql_user }}"
+    password: "{{ wordpress_mysql_password }}"
+    priv: "{{ wordpress_mysql_db }}.*:ALL"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+- name: Create WordPress directory
+  file:
+    path: "{{ wordpress_path }}"
+    state: directory
+- name: Download and unpack WordPress
+  unarchive:
+    src: "{{ wordpress_src }}"
+    remote_src: yes
+    dest: "{{ wordpress_path }}"
+    extra_opts:
+      - "--strip-components=1"
+    creates: "{{ wordpress_path }}/index.php"
+- name: Create WordPress configuration file
+  template:
+    src: "files/wp-config.php.j2"
+    dest: "{{ wordpress_path }}/wp-config.php"
+- name: Set WordPress directory ownership
+  file:
+    path: "{{ wordpress_path }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    recurse: yes
+- name: Set WordPress directory permissions
+  shell: "/usr/bin/find {{ wordpress_path }} -type d -exec chmod 750 {} \\;"
+- name: Set WordPress file permissions
+  shell: "/usr/bin/find {{ wordpress_path }} -type f -exec chmod 640 {} \\;"
+
+# Certbot
+- name: Install Snap package
+  apt:
+    name: "{{ item }}"
+    update_cache: yes
+    state: latest
+  loop:
+    - snapd
+- name: Ensure Snapd is running
+  service:
+    name: snapd
+    state: started
+- name: Install Snap core
+  snap:
+    name: core
+- name: Install Certbot snap
+  snap:
+    name: certbot
+    classic: yes
+- name: Trust Certbot plugins with root
+  command: snap set certbot trust-plugin-with-root=ok
+- name: Install Certbot Google DNS plugin
+  snap:
+    name: certbot-dns-google
+- name: Create Certbot link
+  file:
+    src: /snap/bin/certbot
+    dest: /usr/bin/certbot
+    state: link
+- name: Create {{ certbot_dns_google_credentials_file_dir }}
+  file:
+    path: "{{ certbot_dns_google_credentials_file_dir }}"
+    state: directory
+    mode: 0600
+- name: Copy GCP service account credentials
+  copy:
+    src: "{{ certbot_dns_google_credentials_file }}"
+    dest: "{{ certbot_dns_google_credentials_file_dest }}"
+    owner: root
+    group: root
+    mode: 0600
+- name: Get Let's Encrypt certificate
+  command: |
+    certbot certonly \
+      --dns-google \
+      --dns-google-credentials {{ certbot_dns_google_credentials_file_dest }} \
+      --dns-google-propagation-seconds {{ certbot_dns_google_propagation_seconds }} \
+      --agree-tos \
+      -m {{ certbot_email }} \
+      --cert-name {{ wordpress_http_host }} \
+      -d {{ wordpress_http_host }} \
+      -d www.{{ wordpress_http_host }}
+  args:
+    creates: /etc/letsencrypt/live/{{ wordpress_http_host }}
+
+# Nginx
+- name: Create Nginx configuration file
+  template:
+    src: files/nginx.conf.j2
+    dest: /etc/nginx/sites-available/{{ wordpress_http_conf }}
+- name: Enable Nginx site
+  file:
+    src: /etc/nginx/sites-available/{{ wordpress_http_conf }}
+    dest: /etc/nginx/sites-enabled/{{ wordpress_http_conf }}
+    state: link
+  notify: reload nginx

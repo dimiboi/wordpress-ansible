@@ -95,6 +95,7 @@
   template:
     src: files/nginx.conf.j2
     dest: /etc/nginx/sites-available/{{ wordpress_http_conf }}
+  notify: reload nginx
 - name: Enable Nginx site
   file:
     src: /etc/nginx/sites-available/{{ wordpress_http_conf }}

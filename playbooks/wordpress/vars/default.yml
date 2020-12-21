@@ -25,4 +25,5 @@ wordpress_mysql_password: "{{ lookup('password', '.credentials/mysql/wordpress l
 wordpress_http_host: example.com
 
 certbot_email: example@example.com
+certbot_server: https://acme-staging-v02.api.letsencrypt.org/directory
 certbot_dns_google_credentials_file: ~/certbot-service-account.json

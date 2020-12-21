@@ -88,6 +88,7 @@
       --dns-google \
       --dns-google-credentials {{ certbot_dns_google_credentials_file_dest }} \
       --dns-google-propagation-seconds {{ certbot_dns_google_propagation_seconds }} \
+      --server {{ certbot_server }} \
       --agree-tos \
       -m {{ certbot_email }} \
       --cert-name {{ wordpress_http_host }} \

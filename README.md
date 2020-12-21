@@ -28,11 +28,13 @@ Install [devsec.hardening](https://github.com/dev-sec/ansible-collection-hardeni
 $ ansible-galaxy collection install devsec.hardening
 ```
 
-Create a `.vars.yml` file with overriden variable values:
+Create a `.vars.yml` file and set the required variable values:
 
 ```yaml
 ssh_allow_users: john
-wordpress_http_host: doe.example.com
+wordpress_http_hosts:
+  - john.example.net
+  - doe.example.com
 certbot_email: john@doe.example.com
 certbot_server: https://acme-v02.api.letsencrypt.org/directory
 certbot_dns:

@@ -1,7 +1,7 @@
 server {
     root {{ wordpress_path }};
     index index.php;
-    server_name {{ wordpress_http_host }} www.{{ wordpress_http_host }};
+    server_name {{ wordpress_http_hosts | join(' ') }} www.{{ wordpress_http_hosts | join(' www.') }};
 
     location / {
         try_files $uri $uri/ /index.php$is_args$args;
@@ -17,20 +17,22 @@ server {
     }
 
     listen 443 ssl;
-    ssl_certificate /etc/letsencrypt/live/{{ wordpress_http_host }}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/{{ wordpress_http_host }}/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/{{ wordpress_http_hosts | first }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ wordpress_http_hosts | first }}/privkey.pem;
 }
 
 server {
-    if ($host = {{ wordpress_http_host }}) {
+{% for host in wordpress_http_hosts %}
+    if ($host = {{ host }}) {
         return 301 https://$host$request_uri;
     }
 
-    if ($host = www.{{ wordpress_http_host }}) {
+    if ($host = www.{{ host }}) {
         return 301 https://$host$request_uri;
     }
 
+{% endfor %}
     listen 80;
-    server_name {{ wordpress_http_host }} www.{{ wordpress_http_host }};
+    server_name {{ wordpress_http_hosts | join(' ') }} www.{{ wordpress_http_hosts | join(' www.') }};
     return 404;
 }

@@ -17,8 +17,8 @@
       --server {{ certbot_server }} \
       --agree-tos \
       -m {{ certbot_email }} \
-      --cert-name {{ wordpress_http_host }} \
-      -d {{ wordpress_http_host }} \
-      -d www.{{ wordpress_http_host }}
+      --cert-name {{ wordpress_http_hosts | first }} \
+      -d {{ wordpress_http_hosts | join(' -d ') }} \
+      -d www.{{ wordpress_http_hosts | join(' -d www.') }}
   args:
-    creates: /etc/letsencrypt/live/{{ wordpress_http_host }}
+    creates: /etc/letsencrypt/live/{{ wordpress_http_hosts | first }}

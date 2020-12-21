@@ -1,8 +1,8 @@
 wordpress_mysql_db: wordpress
 wordpress_mysql_user: wordpress
 wordpress_src: https://wordpress.org/latest.tar.gz
-wordpress_path: "/var/www/{{ wordpress_http_host }}"
-wordpress_http_conf: "{{ wordpress_http_host }}.conf"
+wordpress_path: "/var/www/{{ wordpress_http_hosts | first }}"
+wordpress_http_conf: "{{ wordpress_http_hosts | first }}.conf"
 
 certbot_dns_credentials_file_dir: ~/.secrets/certbot
 

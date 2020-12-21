@@ -8,6 +8,8 @@ server {
     root {{ wordpress_path }};
     index index.php;
 
+    include {{ wordpress_path }}/nginx[.]conf; # W3 Super Cache
+
     location = /favicon.ico {
         log_not_found off;
         access_log off;

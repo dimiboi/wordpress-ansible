@@ -1,3 +1,18 @@
+# DNS Provider
+- fail:
+    msg: A single DNS provider must be configured
+  when: checklist | select() | list | length != 1
+  vars:
+    checklist:
+      - "{{ certbot_dns.cloudflare_api_token is defined }}"
+      - "{{ certbot_dns.google_credentials_file is defined }}"
+- set_fact:
+    certbot_dns_provider: cloudflare
+  when: certbot_dns.cloudflare_api_token is defined
+- set_fact:
+    certbot_dns_provider: gcp
+  when: certbot_dns.google_credentials_file is defined
+
 # WordPress
 - name: Create database for WordPress
   mysql_db:
@@ -62,40 +77,18 @@
     classic: yes
 - name: Trust Certbot plugins with root
   command: snap set certbot trust-plugin-with-root=ok
-- name: Install Certbot Google DNS plugin
-  snap:
-    name: certbot-dns-google
 - name: Create Certbot link
   file:
     src: /snap/bin/certbot
     dest: /usr/bin/certbot
     state: link
-- name: Create {{ certbot_dns_google_credentials_file_dir }}
+- name: Create {{ certbot_dns_credentials_file_dir }}
   file:
-    path: "{{ certbot_dns_google_credentials_file_dir }}"
+    path: "{{ certbot_dns_credentials_file_dir }}"
     state: directory
     mode: 0600
-- name: Copy GCP service account credentials
-  copy:
-    src: "{{ certbot_dns_google_credentials_file }}"
-    dest: "{{ certbot_dns_google_credentials_file_dest }}"
-    owner: root
-    group: root
-    mode: 0600
-- name: Get Let's Encrypt certificate
-  command: |
-    certbot certonly \
-      --dns-google \
-      --dns-google-credentials {{ certbot_dns_google_credentials_file_dest }} \
-      --dns-google-propagation-seconds {{ certbot_dns_google_propagation_seconds }} \
-      --server {{ certbot_server }} \
-      --agree-tos \
-      -m {{ certbot_email }} \
-      --cert-name {{ wordpress_http_host }} \
-      -d {{ wordpress_http_host }} \
-      -d www.{{ wordpress_http_host }}
-  args:
-    creates: /etc/letsencrypt/live/{{ wordpress_http_host }}
+- name: Include dns-01 challenge tasks
+  include: dns_{{ certbot_dns_provider }}.yml
 
 # Nginx
 - name: Create Nginx configuration file

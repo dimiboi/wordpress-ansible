@@ -1,5 +1,5 @@
 ---
-ssh_allow_users: dmitry
+ssh_allow_users: user
 
 php_modules:
   - php-curl
@@ -26,4 +26,7 @@ wordpress_http_host: example.com
 
 certbot_email: example@example.com
 certbot_server: https://acme-staging-v02.api.letsencrypt.org/directory
-certbot_dns_google_credentials_file: ~/certbot-service-account.json
+
+# certbot_dns:
+#   cloudflare_api_token: 0123456789abcdef0123456789abcdef01234567
+#   google_credentials_file: ~/certbot-service-account.json

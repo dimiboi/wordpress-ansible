@@ -1,0 +1,24 @@
+- name: Install Certbot Google DNS plugin
+  snap:
+    name: certbot-dns-google
+- name: Copy GCP service account credentials
+  copy:
+    src: "{{ certbot_dns.google_credentials_file }}"
+    dest: "{{ certbot_dns_google_credentials_file_dest }}"
+    owner: root
+    group: root
+    mode: 0600
+- name: Get a certificate using dns-01 with GCP
+  command: |
+    certbot certonly \
+      --dns-google \
+      --dns-google-credentials {{ certbot_dns_google_credentials_file_dest }} \
+      --dns-google-propagation-seconds {{ certbot_dns_google_propagation_seconds }} \
+      --server {{ certbot_server }} \
+      --agree-tos \
+      -m {{ certbot_email }} \
+      --cert-name {{ wordpress_http_host }} \
+      -d {{ wordpress_http_host }} \
+      -d www.{{ wordpress_http_host }}
+  args:
+    creates: /etc/letsencrypt/live/{{ wordpress_http_host }}

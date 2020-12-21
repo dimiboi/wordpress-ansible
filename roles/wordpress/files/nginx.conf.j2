@@ -36,3 +36,12 @@ server {
     server_name {{ wordpress_http_hosts | join(' ') }} www.{{ wordpress_http_hosts | join(' www.') }};
     return 404;
 }
+
+server {
+    listen 80 default_server;
+    listen 443 ssl default_server;
+    server_name _;
+    ssl_certificate /etc/letsencrypt/live/{{ wordpress_http_hosts | first }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ wordpress_http_hosts | first }}/privkey.pem;
+    return 444; # no response
+}

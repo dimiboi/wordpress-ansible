@@ -9,6 +9,7 @@ php_modules:
   - php-zip
   - php-imagick
   - php-json
+  - php-bcmath
 
 nginx_add_header:
   - "X-Frame-Options SAMEORIGIN"
